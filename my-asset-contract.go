@@ -11,6 +11,11 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
+const (
+	startKey = "000"
+	endKey = "999"
+)
+
 // MyAssetContract contract for managing CRUD for MyAsset
 type MyAssetContract struct {
 	contractapi.Contract
@@ -31,9 +36,9 @@ func (c *MyAssetContract) MyAssetExists(ctx contractapi.TransactionContextInterf
 func (c *MyAssetContract) CreateMyAsset(ctx contractapi.TransactionContextInterface, myAssetID string, value string) error {
 	exists, err := c.MyAssetExists(ctx, myAssetID)
 	if err != nil {
-		return fmt.Errorf("Could not read from world state. %s", err)
+		return fmt.Errorf("could not read from world state. %s", err)
 	} else if exists {
-		return fmt.Errorf("The asset %s already exists", myAssetID)
+		return fmt.Errorf("the asset %s already exists", myAssetID)
 	}
 
 	myAsset := new(MyAsset)
@@ -48,9 +53,9 @@ func (c *MyAssetContract) CreateMyAsset(ctx contractapi.TransactionContextInterf
 func (c *MyAssetContract) ReadMyAsset(ctx contractapi.TransactionContextInterface, myAssetID string) (*MyAsset, error) {
 	exists, err := c.MyAssetExists(ctx, myAssetID)
 	if err != nil {
-		return nil, fmt.Errorf("Could not read from world state. %s", err)
+		return nil, fmt.Errorf("cCould not read from world state. %s", err)
 	} else if !exists {
-		return nil, fmt.Errorf("The asset %s does not exist", myAssetID)
+		return nil, fmt.Errorf("the asset %s does not exist", myAssetID)
 	}
 
 	bytes, _ := ctx.GetStub().GetState(myAssetID)
@@ -60,7 +65,7 @@ func (c *MyAssetContract) ReadMyAsset(ctx contractapi.TransactionContextInterfac
 	err = json.Unmarshal(bytes, myAsset)
 
 	if err != nil {
-		return nil, fmt.Errorf("Could not unmarshal world state data to type MyAsset")
+		return nil, fmt.Errorf("could not unmarshal world state data to type MyAsset")
 	}
 
 	return myAsset, nil
@@ -70,9 +75,9 @@ func (c *MyAssetContract) ReadMyAsset(ctx contractapi.TransactionContextInterfac
 func (c *MyAssetContract) UpdateMyAsset(ctx contractapi.TransactionContextInterface, myAssetID string, newValue string) error {
 	exists, err := c.MyAssetExists(ctx, myAssetID)
 	if err != nil {
-		return fmt.Errorf("Could not read from world state. %s", err)
+		return fmt.Errorf("could not read from world state. %s", err)
 	} else if !exists {
-		return fmt.Errorf("The asset %s does not exist", myAssetID)
+		return fmt.Errorf("the asset %s does not exist", myAssetID)
 	}
 
 	myAsset := new(MyAsset)
@@ -87,10 +92,33 @@ func (c *MyAssetContract) UpdateMyAsset(ctx contractapi.TransactionContextInterf
 func (c *MyAssetContract) DeleteMyAsset(ctx contractapi.TransactionContextInterface, myAssetID string) error {
 	exists, err := c.MyAssetExists(ctx, myAssetID)
 	if err != nil {
-		return fmt.Errorf("Could not read from world state. %s", err)
+		return fmt.Errorf("could not read from world state. %s", err)
 	} else if !exists {
-		return fmt.Errorf("The asset %s does not exist", myAssetID)
+		return fmt.Errorf("the asset %s does not exist", myAssetID)
 	}
 
 	return ctx.GetStub().DelState(myAssetID)
+}
+
+// queryAllAssets retrive all instances from the world state @Transaction(false)
+func (c *MyAssetContract) QueryAllAssets(ctx contractapi.TransactionContextInterface) ([]MyAsset, error) {
+	var listaDeAssets []MyAsset
+	it, errStub := ctx.GetStub().GetStateByRange(startKey,endKey)
+	if errStub != nil {
+		return nil, fmt.Errorf("could stablish the range from world state. %s", errStub)
+	}
+	defer it.Close()
+	for it.HasNext() {
+		res, errIt := it.Next()
+		if errIt != nil {
+			return nil, errIt
+		}
+		var miAsset MyAsset
+		errJson := json.Unmarshal(res.Value, &miAsset)
+		if errJson != nil {
+			return nil, errJson
+		}
+		listaDeAssets = append(listaDeAssets, miAsset)
+	}
+	return listaDeAssets, nil
 }

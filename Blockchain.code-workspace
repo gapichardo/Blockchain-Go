@@ -3,7 +3,12 @@
     {
       "name": "Blockchain_Go",
       "path": "."
+    },
+    {
+      "path": "../demo-application"
     }
   ],
-  "settings": {}
+  "settings": {
+    "files.autoSave": "onWindowChange"
+  }
 }

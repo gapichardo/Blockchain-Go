@@ -11,7 +11,7 @@ import (
 
 func main() {
 	myAssetContract := new(MyAssetContract)
-	myAssetContract.Info.Version = "0.0.1"
+	myAssetContract.Info.Version = "0.0.2"
 	myAssetContract.Info.Description = "My Smart Contract"
 	myAssetContract.Info.License = new(metadata.LicenseMetadata)
 	myAssetContract.Info.License.Name = "Apache-2.0"
@@ -20,7 +20,7 @@ func main() {
 
 	chaincode, err := contractapi.NewChaincode(myAssetContract)
 	chaincode.Info.Title = "Blockchain_Go chaincode"
-	chaincode.Info.Version = "0.0.1"
+	chaincode.Info.Version = "0.0.2"
 
 	if err != nil {
 		panic("Could not create chaincode from MyAssetContract." + err.Error())

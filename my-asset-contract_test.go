@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -170,4 +170,15 @@ func TestDeleteMyAsset(t *testing.T) {
 	err = c.DeleteMyAsset(ctx, "myAssetkey")
 	assert.Nil(t, err, "should not return error when MyAsset exists in world state when deleting")
 	stub.AssertCalled(t, "DelState", "myAssetkey")
+}
+
+func TestQueryAllAssets(t *testing.T) {
+	var exists bool = false
+
+	ctx, _ := configureStub()
+	c := new(MyAssetContract)
+
+	_, err := c.QueryAllAssets(ctx)
+	assert.Nil(t, err, "should not return error when can read from world state but no value for key")
+	assert.False(t, exists, "should return false when no value for key in world state")
 }
